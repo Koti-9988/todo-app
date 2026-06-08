@@ -1,111 +1,142 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 function App() {
-  const [employees, setEmployees] = useState([]);
-  const [name, setName] = useState("");
-  const [editId, setEditId] = useState(null);
 
-  // Create & Update
-  const handleSubmit = () => {
-    if (!name.trim()) return;
+  const [users, setUsers] = useState([
+     {id:1, name:"koti",age:25},
+     {id:2, name:"venkat",age:35}
+  ]);
 
-    if (editId) {
-      // Update
-      setEmployees(
-        
-        employees.map((employee) => employee.id === editId ? { ...employee, name } : employee)
+ const [isEditing, setIsEditing] = useState(false);
 
-      );
-      setEditId(null);
-    } else {
-      // Create
-      const newEmployee = {
-        id: Date.now(),
-        name,
-      };
+  const [formData, setFormData]=useState({ 
+    name:"", 
+    age:"" 
+  });
 
-      setEmployees([...employees, newEmployee]);
-    }
+    function editUser(user) {
+    setFormData(user);
+    setIsEditing(true);
+  }
 
-    setName("");
+  
+  function handleChange(e){
 
-  };
+    setFormData({
+      ...formData, 
+      [e.target.name]:[e.target.value]
+    });
 
-  // Edit
-  const handleEdit = (employee) => {
-    setName(employee.name);
-    setEditId(employee.id);
-  };
+     
 
-  // Delete
-  const handleDelete = (id) => {
-    setEmployees(
-      employees.filter(
-        (employee) => employee.id !== id
-      )
+  }
+
+  
+
+
+ function addUser(e){
+
+    e.preventDefault();
+
+     const newUser = {
+
+      
+      id: users.length + 1,
+     
+      name: formData.name,
+      age: formData.age 
+    };
+
+    setUsers([...users, newUser]);
+
+    setFormData({
+      name:"",
+      age:""
+    });
+
+  }
+
+
+   function updateUser(e) {
+    e.preventDefault();
+
+    const updatedUsers = users.map((user) =>
+      user.id === formData.id ? formData  : user
     );
-  };
+
+    setUsers(updatedUsers);
+
+    setFormData({
+      id: null,
+      name: "",
+      age: ""
+    });
+
+     setIsEditing(false);
+
+  }
+
+
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Employee App</h2>
+    <>
+    <div>
+     
+      
+      <p>Total Users : {users.length}</p>
 
-      <input
-        type="text"
-        placeholder="Enter Employee Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
+       <h2>{isEditing ? "Update User" : "Add User"}</h2>
 
-      <button onClick={handleSubmit}>
-        {editId ? "Update" : "Add"}
-      </button>
+      <form onSubmit={isEditing ? updateUser : addUser} >
 
-      <table
-        border="1"
-        cellPadding="10"
-        style={{ marginTop: "20px" }}
-      >
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Actions</th>
+         <div >
+         
+        <input name="name" type="text"  value={formData.name} onChange={handleChange} placeholder="Enter Your Name" />
+
+         </div>
+         <div >
+             
+           <input name="age" type="number"  value={formData.age} onChange={handleChange} placeholder="Enter Your Age" />
+          
+         </div>
+        
+          
+          <div>
+           <button type="submit"> {isEditing ? "Update User" : "Add User"}</button>
+          </div>
+         
+
+      </form>
+
+      <table  border="1">
+        <tr>
+          <th>id</th>
+           <th>name</th>
+            <th>age</th>
+            <th>action</th>
+        </tr>
+        { users.map(user => (
+           <tr key={user.id}>
+          <td>{user.id}</td>
+          <td>{user.name}</td>
+          <td>{user.age}</td>
+          <td><button onClick={() => editUser(user)}>
+                  Edit
+                </button></td>
           </tr>
-        </thead>
 
-        <tbody>
-          {employees.length === 0 ? (
-            <tr>
-              <td colSpan="3" style={{backgroundColor:"green",color:"white"}}> No Employees Found </td>
-            </tr>
-          ) : (
-            employees.map((employee) => (
-              <tr key={employee.id}>
-                <td>{employee.id}</td>
-                <td>{employee.name}</td>
-                <td>
-                  <button
-                    onClick={() => handleEdit(employee)}
-                  >
-                    Edit
-                  </button>
+        ))
 
-                  <button
-                    onClick={() =>
-                      handleDelete(employee.id)
-                    }
-                    style={{ marginLeft: "10px",backgroundColor:"red",color:"white",border:"0px" }}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
+        
+        }
+       
       </table>
+      
     </div>
+
+    </>
+    
   );
 }
 
